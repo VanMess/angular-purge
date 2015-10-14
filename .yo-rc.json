@@ -1,0 +1,29 @@
+{
+  "generator-angularjs-library": {
+    "props": {
+      "author": {
+        "name": "van",
+        "email": "1321907687@qq.com"
+      },
+      "libraryName": {
+        "original": "angular-purge",
+        "camelized": "angularPurge",
+        "dasherized": "angular-purge",
+        "slugified": "angular-purge",
+        "parts": [
+          "angular",
+          "purge"
+        ]
+      },
+      "includeModuleDirectives": false,
+      "includeModuleFilters": false,
+      "includeModuleServices": false,
+      "includeAngularModuleResource": false,
+      "includeAngularModuleCookies": false,
+      "includeAngularModuleSanitize": false,
+      "librarySrcDirectory": "src/angular-purge",
+      "libraryUnitTestDirectory": "test/unit/angular-purge",
+      "libraryUnitE2eDirectory": "test/e2e/angular-purge"
+    }
+  }
+}
