@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>angular 数据转换器 purge</title>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container" ng-controller="DemoController as ctrl">
+        <div class="row">
+            <div class="col-xs-12 col-md-6">
+                <h1>response 数据转换：</h1>
+                <hr>
+                <h2>简单数据映射</h2>
+                <div>
+                    <h5>源数据格式</h5>
+                    <pre><code>{{ctrl.userSource | json}}</code></pre>
+                </div>
+                <div>
+                    <h5>经过解析的数据格式</h5>
+                    <pre><code>{{ctrl.user | json}}</code></pre>
+                </div>
+                <div>
+                    <h6>映射代码</h6>
+                    <pre><code>{{ctrl.mappings.user | json}}</code></pre>
+                </div>
+                <hr>
+                <h2>嵌套结构数据映射</h2>
+                <div>
+                    <h5>源数据格式</h5>
+                    <pre><code>{{ctrl.bookSource | json}}</code></pre>
+                </div>
+                <div>
+                    <h5>经过解析的数据格式</h5>
+                    <pre><code>{{ctrl.book | json}}</code></pre>
+                </div>
+                <div>
+                    <h6>映射代码</h6>
+                    <pre><code>{{ctrl.mappings.book | json}}</code></pre>
+                </div>
+                <hr>
+            </div>
+            <div class="col-xs-12 col-md-6">
+                <h1>request 请求参数转换：</h1>
+                <hr>
+                <h2>简单数据映射</h2>
+                <div>
+                    <h5>源数据格式</h5>
+                    <pre><code>{{ctrl.userParamSource | json}}</code></pre>
+                </div>
+                <div>
+                    <h5>经过解析的数据格式</h5>
+                    <pre><code>{{ctrl.userParam | json}}</code></pre>
+                </div>
+                <div>
+                    <h6>映射代码</h6>
+                    <pre><code>{{ctrl.mappings.userParam | json}}</code></pre>
+                </div>
+                <hr>
+            </div>
+        </div>
+    </div>
+    <script src="http://cdn.bootcss.com/angular.js/1.2.28/angular.min.js"></script>
+    <script src="http://cdn.bootcss.com/ionic/1.1.0/js/angular/angular-resource.js"></script>
+    <script src="http://mockjs.com/dist/mock-min.js"></script>
+    <script src="http://think2011.github.io/mock-angular/src/mock.angular.js"></script>
+    <script src="/dist/angular-purge.js"></script>
+    <script src="/sample/demo.js"></script>
+</body>
+
+</html>

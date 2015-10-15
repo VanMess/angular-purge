@@ -5,19 +5,37 @@ var PurgeClass = (function() {
     var parseChannels,
 
         Model = function(modelConfig) {
-            this._parser = _.isFunction(modelConfig) ? modelConfig : _cfgToParser(modelConfig);
+            this._parsers = {};
+            if (ng.isFunction(modelConfig)) {
+                this._parsers = modelConfig;
+            } else {
+                for (var i in modelConfig) {
+                    this._parsers[i] = ng.isFunction(modelConfig[i]) ? modelConfig[i] : _cfgToParser(modelConfig[i]);
+                }
+            }
         };
 
     Model.prototype = {
         parse: function(data) {
             var result;
-            if (_.isArray(data)) {
+            if (ng.isArray(data)) {
                 result = [];
                 for (var i = 0; i < data.length; i++) {
-                    result.push(this._parser(data[i]));
+                    result.push(this.$$parse(data[i]));
                 }
             } else {
-                result = this._parser(data);
+                result = this.$$parse(data);
+            }
+            return result;
+        },
+        $$parse: function(item) {
+            var result = {};
+            if (ng.isFunction(this._parsers)) {
+                result = this._parsers(item);
+            } else {
+                for (var i in this._parsers) {
+                    result[i] = this._parsers[i](item);
+                }
             }
             return result;
         }
@@ -31,7 +49,7 @@ var PurgeClass = (function() {
         parseChannels = channels;
     }
 
-    function _isEmpty() {
+    function _isEmpty(obj) {
         var hasOwnProperty = Object.prototype.hasOwnProperty,
             toString = Object.prototype.toString;
 

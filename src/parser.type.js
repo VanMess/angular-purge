@@ -45,16 +45,16 @@ ng.module(libraryName).provider('purge.typeParser', [
                 },
                 $get: function() {
                     return function(current, config) {
-                        var next, tmp = _.isFunction(config) ? config : config.formatter;
-                        if (_.isFunction(tmp)) {
+                        var next, tmp = ng.isFunction(config) ? config : config.formatter;
+                        if (ng.isFunction(tmp)) {
                             next = function(data) {
                                 var value = current(data);
                                 return tmp(value, config.format);
                             };
-                        } else if (_.isString(config.formatter) && _.isFunction(transporter[config.formatter])) {
+                        } else if (ng.isString(config.formatter) && ng.isFunction(transporters[config.formatter])) {
                             next = function(data) {
                                 var value = current(data);
-                                return transporter[config.formatter](value, config.format);
+                                return transporters[config.formatter](value, config.format);
                             };
                         } else {
                             next = current;

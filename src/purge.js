@@ -5,8 +5,8 @@
  */
 ng.module(libraryName)
     .provider('purge', [
-        'purge.helper',
-        function(purgeHelper) {
+
+        function() {
             var provider = {
                 $reg: function(name, modelConfig) {
                     var cfgs;
@@ -17,13 +17,19 @@ ng.module(libraryName)
                         cfgs[name + ''] = modelConfig;
                     }
 
-                    ng.forEach(cfgs, function(i, key, value) {
+                    ng.forEach(cfgs, function(value, key) {
                         purgeHelper(key, value);
                     });
+                    return provider;
                 },
-                $get: function() {
-                    return purgeHelper.get;
-                }
+                $get: [
+                    'purge.parsers',
+                    function(parsers) {
+                        PurgeClass.setChannels(parsers.get());
+                        purgeHelper.$$init();
+                        return purgeHelper.get;
+                    }
+                ]
             };
             return provider;
         }

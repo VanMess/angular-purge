@@ -11,6 +11,5 @@
         // Global Variables
         factory(window.angular);
     }
-    factory(window.angular);
 })(function(ng) {
         'use strict';

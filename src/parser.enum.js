@@ -22,7 +22,7 @@ ng.module(libraryName).provider('purge.enumParser', [
                         tst = name;
                     } else {
                         tst = {};
-                        tst[name] = transporter;
+                        tst[name] = enumDefine;
                     }
                     ng.forEach(tst, function(i, key, value) {
                         systemEnums[key] = value;

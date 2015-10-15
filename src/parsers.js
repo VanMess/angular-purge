@@ -9,7 +9,7 @@ ng.module(libraryName).factory('purge.parsers', [
                 function(current, config) {
                     var next, childModel;
                     if (config.hasOwnProperty('child')) {
-                        childModel = new Model(config['child']);
+                        childModel = new PurgeClass(config['child']);
                         next = function(data) {
                             var value = current(data);
                             return value === null ? value : childModel.parse(value);
@@ -25,7 +25,7 @@ ng.module(libraryName).factory('purge.parsers', [
                     if (config.hasOwnProperty('defaults')) {
                         next = function(data) {
                             var value = current(data);
-                            if (_.isUndefined(value) || _.isNull(value)) value = ng.copy(config.defaults);
+                            if (ng.isUndefined(value) || value + '' === 'null') value = ng.copy(config.defaults);
                             return value;
                         };
                     } else {

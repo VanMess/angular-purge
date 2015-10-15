@@ -11,19 +11,12 @@
         // Global Variables
         factory(window.angular);
     }
-    factory(window.angular);
 })(function(ng) {
         'use strict';
 
 var libraryName = 'vgPurge';
 // Modules
-ng.module(libraryName, [])
-    .run([
-        'purge.parsers',
-        function(parsers) {
-            PurgeClass.setChannels(parsers.get());
-        }
-    ]);
+ng.module(libraryName, []);
 
 /*
  *  模块配置
@@ -51,13 +44,16 @@ Object.keys = Object.keys || (function(obj) { //ecma262v5 15.2.3.14
     var hasOwn = Object.prototype.hasOwnProperty,
         DONT_ENUM = 'propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor'.split(',');
     return function(obj) {
-        var result = [];
-        for (var key in obj)
+        var result = [],
+            key;
+        for (key in obj) {
             if (hasOwn.call(obj, key)) {
                 result.push(key);
             }
+        }
         if (DONT_ENUM && obj) {
-            for (var i = 0; key = DONT_ENUM[i++];) {
+            for (var i = 0; i < DONT_ENUM.length; i++) {
+                key = DONT_ENUM[i++];
                 if (hasOwn.call(obj, key)) {
                     result.push(key);
                 }
@@ -91,7 +87,7 @@ ng.module(libraryName).provider('purge.enumParser', [
                         tst = name;
                     } else {
                         tst = {};
-                        tst[name] = transporter;
+                        tst[name] = enumDefine;
                     }
                     ng.forEach(tst, function(i, key, value) {
                         systemEnums[key] = value;
@@ -190,16 +186,16 @@ ng.module(libraryName).provider('purge.typeParser', [
                 },
                 $get: function() {
                     return function(current, config) {
-                        var next, tmp = _.isFunction(config) ? config : config.formatter;
-                        if (_.isFunction(tmp)) {
+                        var next, tmp = ng.isFunction(config) ? config : config.formatter;
+                        if (ng.isFunction(tmp)) {
                             next = function(data) {
                                 var value = current(data);
                                 return tmp(value, config.format);
                             };
-                        } else if (_.isString(config.formatter) && _.isFunction(transporter[config.formatter])) {
+                        } else if (ng.isString(config.formatter) && ng.isFunction(transporters[config.formatter])) {
                             next = function(data) {
                                 var value = current(data);
-                                return transporter[config.formatter](value, config.format);
+                                return transporters[config.formatter](value, config.format);
                             };
                         } else {
                             next = current;
@@ -228,7 +224,7 @@ ng.module(libraryName).factory('purge.parsers', [
                 function(current, config) {
                     var next, childModel;
                     if (config.hasOwnProperty('child')) {
-                        childModel = new Model(config['child']);
+                        childModel = new PurgeClass(config['child']);
                         next = function(data) {
                             var value = current(data);
                             return value === null ? value : childModel.parse(value);
@@ -244,7 +240,7 @@ ng.module(libraryName).factory('purge.parsers', [
                     if (config.hasOwnProperty('defaults')) {
                         next = function(data) {
                             var value = current(data);
-                            if (_.isUndefined(value) || _.isNull(value)) value = ng.copy(config.defaults);
+                            if (ng.isUndefined(value) || value + '' === 'null') value = ng.copy(config.defaults);
                             return value;
                         };
                     } else {
@@ -288,8 +284,8 @@ ng.module(libraryName).factory('purge.parsers', [
  */
 ng.module(libraryName)
     .provider('purge', [
-        'purge.helper',
-        function(purgeHelper) {
+
+        function() {
             var provider = {
                 $reg: function(name, modelConfig) {
                     var cfgs;
@@ -300,13 +296,19 @@ ng.module(libraryName)
                         cfgs[name + ''] = modelConfig;
                     }
 
-                    ng.forEach(cfgs, function(i, key, value) {
+                    ng.forEach(cfgs, function(value, key) {
                         purgeHelper(key, value);
                     });
+                    return provider;
                 },
-                $get: function() {
-                    return purgeHelper.get;
-                }
+                $get: [
+                    'purge.parsers',
+                    function(parsers) {
+                        PurgeClass.setChannels(parsers.get());
+                        purgeHelper.$$init();
+                        return purgeHelper.get;
+                    }
+                ]
             };
             return provider;
         }
@@ -319,19 +321,37 @@ var PurgeClass = (function() {
     var parseChannels,
 
         Model = function(modelConfig) {
-            this._parser = _.isFunction(modelConfig) ? modelConfig : _cfgToParser(modelConfig);
+            this._parsers = {};
+            if (ng.isFunction(modelConfig)) {
+                this._parsers = modelConfig;
+            } else {
+                for (var i in modelConfig) {
+                    this._parsers[i] = ng.isFunction(modelConfig[i]) ? modelConfig[i] : _cfgToParser(modelConfig[i]);
+                }
+            }
         };
 
     Model.prototype = {
         parse: function(data) {
             var result;
-            if (_.isArray(data)) {
+            if (ng.isArray(data)) {
                 result = [];
                 for (var i = 0; i < data.length; i++) {
-                    result.push(this._parser(data[i]));
+                    result.push(this.$$parse(data[i]));
                 }
             } else {
-                result = this._parser(data);
+                result = this.$$parse(data);
+            }
+            return result;
+        },
+        $$parse: function(item) {
+            var result = {};
+            if (ng.isFunction(this._parsers)) {
+                result = this._parsers(item);
+            } else {
+                for (var i in this._parsers) {
+                    result[i] = this._parsers[i](item);
+                }
             }
             return result;
         }
@@ -345,7 +365,7 @@ var PurgeClass = (function() {
         parseChannels = channels;
     }
 
-    function _isEmpty() {
+    function _isEmpty(obj) {
         var hasOwnProperty = Object.prototype.hasOwnProperty,
             toString = Object.prototype.toString;
 
@@ -396,129 +416,142 @@ var PurgeClass = (function() {
 
 /*
  */
-ng.module(libraryName)
-    .factory('purge.helper', [
-
-        function() {
-            var cache = {},
-                modelInit = function(modelConfig) {
-                    var config = {};
-                    if (ng.isFunction(modelConfig)) {
-                        config = modelConfig;
-                    } else {
-                        config = modelParse(modelConfig);
-                    }
-                    return config;
+var purgeHelper = (function() {
+    var cache = {},
+        modelInit = function(modelConfig) {
+            var config = {};
+            if (ng.isFunction(modelConfig)) {
+                config = modelConfig;
+            } else {
+                for (var i in modelConfig) {
+                    if (ng.isUndefined(modelConfig[i])) continue;
+                    config[i] = modelParse(i, modelConfig[i]);
+                }
+            }
+            return config;
+        },
+        modelParse = function(name, cfg) {
+            var defaults = {
+                    type: 'auto'
                 },
-                modelParse = function(name, cfg) {
-                    var defaults = {
-                            type: 'auto'
-                        },
-                        standarCfg;
-                    if (_.isString(cfg)) {
-                        standarCfg = _.extend({}, defaults, {
-                            mapping: cfg
-                        });
-                    } else if (_.isObject(cfg)) {
-                        standarCfg = _.extend({}, defaults, cfg);
+                standarCfg;
+            if (ng.isString(cfg)) {
+                standarCfg = ng.extend({}, defaults, {
+                    name: name,
+                    mapping: cfg
+                });
+            } else if (ng.isObject(cfg)) {
+                standarCfg = ng.extend({}, defaults, {
+                    name: name,
+                    mapping: name
+                }, cfg);
+            }
+
+            if (!!cfg && cfg.hasOwnProperty('child') && ng.isObject(cfg['child'])) {
+                standarCfg['child'] = modelInit(cfg['child']);
+            }
+            return standarCfg;
+        };
+
+    var _runblocks = [],
+        result = function(name, modelConfig) {
+            var init = (function(name, modelConfig) {
+                return function() {
+                    var modelId = name,
+                        config = modelInit(modelConfig);
+
+                    if (cache.hasOwnProperty(modelId)) {
+                        // todo: 抛出异常
                     }
-
-                    if (cfg.hasOwnProperty('child') && ng.isObject(cfg['child'])) {
-                        standarCfg['child'] = modelInit(cfg['child']);
-                    }
-                    return standarCfg;
-                };
-
-            var result = function(modelConfig) {
-                var modelId = name,
-                    config = modelInit(name, modelConfig);
-
-                if (cache.hasOwnProperty(modelId)) {
-                    // todo: 抛出异常
-                }
-                cache[modelId] = new PurgeClass(config);
-                cache[modelId]['id'] = modelId;
-                return cache[modelId];
-            };
-
-            result.get = function(modelId) {
-                if (cache[modelId] instanceof Model) {
+                    cache[modelId] = new PurgeClass(config);
+                    cache[modelId]['id'] = modelId;
                     return cache[modelId];
-                }
-                return undefined;
-            };
-            result.remove = function(modelId) {
-                if (cache[modelId] instanceof Model) {
-                    cache[modelId] = undefined;
-                }
-            };
-            result.clear = function() {
-                cache = {};
-            };
+                };
+            })(name, modelConfig);
 
-            return result;
+            _runblocks.push(init);
+        };
+
+    result.get = function(modelId) {
+        if (cache[modelId] instanceof PurgeClass) {
+            return cache[modelId];
         }
-    ]);
+        return undefined;
+    };
+    result.remove = function(modelId) {
+        if (cache[modelId] instanceof PurgeClass) {
+            cache[modelId] = undefined;
+        }
+    };
+    result.clear = function() {
+        cache = {};
+    };
+    result.$$init = function() {
+        ng.forEach(_runblocks, function(func) {
+            func();
+        });
+        _runblocks = [];
+    };
+
+    return result;
+})();
 
 /*
  *  配置并使用 http 管道
  */
 ng.module(libraryName)
-    .factory('purge.interceptor', [
-
-        function() {
-            var itcp = function($q, purgeConfig, purge) {
-                return {
-                    'request': function(config) {
-                        var model = null,
-                            property = purgeConfig.requestFormatProperty;
-
-                        if (ng.isObject(config.data) && config.hasOwnProperty(property)) {
-                            if (ng.isFunction(config[property])) {
-                                // 支持函数模式的 purge 定义
-                                model = config[property];
-                                config.data = model(config.data)
-                            } else if (ng.isString(config[property])) {
-                                // 从已注册的purge转换器中查找
-                                model = purge(config[property] + '');
-                                if (ng.isObject(model) && ng.isFunction(model.parse)) {
-                                    config.data = model.parse(config.data);
-                                }
-                                // todo : 抛出异常
-                            }
-                        }
-                        return $q.when(config);
-                    },
-                    'response': function(response) {
-                        var model = null,
-                            property = purgeConfig.responseFormatProperty,
-                            config = response.config;
-
-                        if (config.hasOwnProperty(property)) {
-                            if (ng.isFunction(config[property])) {
-                                // 支持函数模式的 purge 定义
-                                model = config[property];
-                                response.data = model(response.data)
-                            } else if (ng.isString(config[property])) {
-                                // 从已注册的purge转换器中查找
-                                model = purge(config[property]);
-                                if (ng.isObject(model) && ng.isFunction(model.parse)) {
-                                    response.data = model.parse(response.data);
-                                }
-                                // todo : 抛出异常
-                            }
-                        }
-
-                        return $q.when(response);
-                    }
-                };
-            };
-            return ['$q', 'purge.config', 'purge', itcp];
-        }
-    ]).config(['$httpProvider',
+    .config(['$httpProvider',
         function($httpProvider) {
-            $httpProvider.interceptors.push('purge.interceptor');
+            $httpProvider.interceptors.push(['$q', 'purge.config', 'purge', _itcp]);
         }
     ]);
+
+
+function _itcp($q, purgeConfig, purge) {
+    return {
+        'request': function(config) {
+            var model = null,
+                property = purgeConfig.requestFormatProperty;
+
+            if (ng.isObject(config.data) && config.hasOwnProperty(property)) {
+                if (ng.isFunction(config[property])) {
+                    // 支持函数模式的 purge 定义
+                    model = config[property];
+                    config.data = model(config.data);
+                } else if (ng.isString(config[property])) {
+                    // 从已注册的purge转换器中查找
+                    model = purge(config[property] + '');
+                    if (ng.isObject(model) && ng.isFunction(model.parse)) {
+                        config.data = model.parse(config.data);
+                    }
+                    // todo : 抛出异常
+                }
+            }
+            return $q.when(config);
+        },
+        'response': function(response) {
+            var model = null,
+                property = purgeConfig.responseFormatProperty,
+                config = response.config;
+
+            if (config.hasOwnProperty(property)) {
+                if (ng.isFunction(config[property])) {
+                    // 支持函数模式的 purge 定义
+                    model = config[property];
+                    response.data = model(response.data)
+                } else if (ng.isString(config[property])) {
+                    // 从已注册的purge转换器中查找
+                    model = purge(config[property]);
+                    if (ng.isObject(model) && ng.isFunction(model.parse)) {
+                        response.data = model.parse(response.data);
+                    }
+                    // todo : 抛出异常
+                }
+            }
+
+            return $q.when(response);
+        }
+    };
+}
 
 });
