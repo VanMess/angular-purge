@@ -37,7 +37,7 @@
 
     // 配置 转换器
     .config([
-        'purgeProvider',
+        'vgPurgeProvider',
         function(purgeProvider) {
             for (var i in purgeMapping) {
                 purgeProvider.$reg(i, purgeMapping[i]);

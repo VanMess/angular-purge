@@ -13,7 +13,8 @@
     "test",
     "gulpfile.js",
     "karma-*.conf.js",
-    "**/.*"
+    "**/.*",
+    "sample"
   ],
   "dependencies": {},
   "devDependencies": {

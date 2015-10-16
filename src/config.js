@@ -3,7 +3,7 @@
  */
 ng
     .module(libraryName)
-    .provider('purge.config', function() {
+    .provider(libraryName + '.config', function() {
         var cfg = {
                 requestFormatProperty: 'paramFormat',
                 responseFormatProperty: 'dataFormat'

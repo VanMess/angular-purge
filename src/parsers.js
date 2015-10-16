@@ -1,7 +1,7 @@
 /*
     {name:'name',type:'auto',mapping:'name',formatter:function|name,format:'yyyy-dd-mm',defaults:1,child:[modelConfig]}
 */
-ng.module(libraryName).factory('purge.parsers', [
+ng.module(libraryName).factory(libraryName + '.parsers', [
 
     function() {
         var channels = [

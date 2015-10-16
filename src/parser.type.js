@@ -1,7 +1,7 @@
 /*
  *  格式化器
  */
-ng.module(libraryName).provider('purge.typeParser', [
+ng.module(libraryName).provider(libraryName + '.typeParser', [
 
     function() {
         var transporters = {
@@ -66,7 +66,7 @@ ng.module(libraryName).provider('purge.typeParser', [
 
         return provider;
     }
-]).run(['purge.parsers', 'purge.typeParser',
+]).run([libraryName + '.parsers', libraryName + '.typeParser',
     function(parsers, typeParser) {
         parsers.unshift(typeParser);
     }

@@ -4,7 +4,7 @@
  * {type:'auto',mapping:'name',formatter:function|name,format:'yyyy-dd-mm',defaults:1,child:[modelConfig]}
  */
 ng.module(libraryName)
-    .provider('purge', [
+    .provider(libraryName, [
 
         function() {
             var provider = {
@@ -23,7 +23,7 @@ ng.module(libraryName)
                     return provider;
                 },
                 $get: [
-                    'purge.parsers',
+                    libraryName + '.parsers',
                     function(parsers) {
                         PurgeClass.setChannels(parsers.get());
                         purgeHelper.$$init();

@@ -4,7 +4,7 @@
 ng.module(libraryName)
     .config(['$httpProvider',
         function($httpProvider) {
-            $httpProvider.interceptors.push(['$q', 'purge.config', 'purge', _itcp]);
+            $httpProvider.interceptors.push(['$q', libraryName + '.config', libraryName, _itcp]);
         }
     ]);
 

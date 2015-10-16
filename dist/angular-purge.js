@@ -23,7 +23,7 @@ ng.module(libraryName, []);
  */
 ng
     .module(libraryName)
-    .provider('purge.config', function() {
+    .provider(libraryName + '.config', function() {
         var cfg = {
                 requestFormatProperty: 'paramFormat',
                 responseFormatProperty: 'dataFormat'
@@ -66,7 +66,7 @@ Object.keys = Object.keys || (function(obj) { //ecma262v5 15.2.3.14
 /*
  *  枚举值转换器
  */
-ng.module(libraryName).provider('purge.enumParser', [
+ng.module(libraryName).provider(libraryName + '.enumParser', [
 
     function() {
         var ENUM_DEFAULT_PROPERTY = 'default',
@@ -133,7 +133,7 @@ ng.module(libraryName).provider('purge.enumParser', [
             return null;
         }
     }
-]).run(['purge.parsers', 'purge.enumParser',
+]).run([libraryName + '.parsers', libraryName + '.enumParser',
     function(parsers, enumParser) {
         parsers.push(enumParser);
     }
@@ -142,7 +142,7 @@ ng.module(libraryName).provider('purge.enumParser', [
 /*
  *  格式化器
  */
-ng.module(libraryName).provider('purge.typeParser', [
+ng.module(libraryName).provider(libraryName + '.typeParser', [
 
     function() {
         var transporters = {
@@ -207,7 +207,7 @@ ng.module(libraryName).provider('purge.typeParser', [
 
         return provider;
     }
-]).run(['purge.parsers', 'purge.typeParser',
+]).run([libraryName + '.parsers', libraryName + '.typeParser',
     function(parsers, typeParser) {
         parsers.unshift(typeParser);
     }
@@ -216,7 +216,7 @@ ng.module(libraryName).provider('purge.typeParser', [
 /*
     {name:'name',type:'auto',mapping:'name',formatter:function|name,format:'yyyy-dd-mm',defaults:1,child:[modelConfig]}
 */
-ng.module(libraryName).factory('purge.parsers', [
+ng.module(libraryName).factory(libraryName + '.parsers', [
 
     function() {
         var channels = [
@@ -283,7 +283,7 @@ ng.module(libraryName).factory('purge.parsers', [
  * {type:'auto',mapping:'name',formatter:function|name,format:'yyyy-dd-mm',defaults:1,child:[modelConfig]}
  */
 ng.module(libraryName)
-    .provider('purge', [
+    .provider(libraryName, [
 
         function() {
             var provider = {
@@ -302,7 +302,7 @@ ng.module(libraryName)
                     return provider;
                 },
                 $get: [
-                    'purge.parsers',
+                    libraryName + '.parsers',
                     function(parsers) {
                         PurgeClass.setChannels(parsers.get());
                         purgeHelper.$$init();
@@ -502,7 +502,7 @@ var purgeHelper = (function() {
 ng.module(libraryName)
     .config(['$httpProvider',
         function($httpProvider) {
-            $httpProvider.interceptors.push(['$q', 'purge.config', 'purge', _itcp]);
+            $httpProvider.interceptors.push(['$q', libraryName + '.config', libraryName, _itcp]);
         }
     ]);
 

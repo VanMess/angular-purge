@@ -1,7 +1,7 @@
 /*
  *  枚举值转换器
  */
-ng.module(libraryName).provider('purge.enumParser', [
+ng.module(libraryName).provider(libraryName + '.enumParser', [
 
     function() {
         var ENUM_DEFAULT_PROPERTY = 'default',
@@ -68,7 +68,7 @@ ng.module(libraryName).provider('purge.enumParser', [
             return null;
         }
     }
-]).run(['purge.parsers', 'purge.enumParser',
+]).run([libraryName + '.parsers', libraryName + '.enumParser',
     function(parsers, enumParser) {
         parsers.push(enumParser);
     }
